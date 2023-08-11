@@ -30,7 +30,7 @@ def mkhistlogx(name, title, nbins, xmin, xmax,logx=True):
         else:
             xbins[i]= xmin + i*binwidth
 
-#    print 'xbins', xbins        
+#    print ('xbins', xbins )       
     h = TH1F(name,title,nbins,xbins);
     return h
 def mkhistlogxy(name, title, nbinsx, xmin, xmax,nbinsy,ymin,ymax,logx=True,logy=True):
@@ -229,25 +229,25 @@ def mkEfficiencyRatio(hPassList, hAllList,hName = 'hRatio'):#for weighted MC, yo
         hPassList[i].Sumw2()
         hAllList[i].Sumw2()    
         g = TGraphAsymmErrors(hPassList[i],hAllList[i],'cp')
-        print 'RATIO........'
+        print ('RATIO........')
         FixEfficiency(g,hPassList[i])
         hEffList.append(hPassList[i].Clone('hEff'+str(i)))
         hEffList[-1].Divide(hAllList[i])
         cSam1 = TCanvas('cSam1')
-        print 'this is the simply divided histogram:'
+        print ('this is the simply divided histogram:')
         hEffList[-1].Draw()
         cSam1.Update()
 
-        print 'now putting in the uncertainties under ratio'
+        print ('now putting in the uncertainties under ratio')
         for ibin in range(1,hEffList[-1].GetXaxis().GetNbins()+1):
-            print 'setting errory(ibin)=',ibin,g.GetX()[ibin],g.GetErrorY(ibin)
-            print 'compared with histo',ibin,
+            print ('setting errory(ibin)=',ibin,g.GetX()[ibin],g.GetErrorY(ibin))
+            print ('compared with histo',ibin)
             hEffList[-1].SetBinError(ibin,1*g.GetErrorY(ibin-1))
-            print 'errory(ibin)=',g.GetX()[ibin],g.GetErrorY(ibin-1)
+            print ('errory(ibin)=',g.GetX()[ibin],g.GetErrorY(ibin-1))
         #histoStyler(hEffList[-1],hPassList[i].GetLineColor())
 
         cSam2 = TCanvas('cSam2')
-        print 'this is the after divided histogram:'
+        print ('this is the after divided histogram:')
         hEffList[-1].Draw()
         cSam2.Update()
 
@@ -264,7 +264,7 @@ def mkEfficiencyRatio(hPassList, hAllList,hName = 'hRatio'):#for weighted MC, yo
 
 def pause(str_='push enter key when ready'):
         import sys
-        print str_
+        print (str_)
         sys.stdout.flush() 
         raw_input('')
 

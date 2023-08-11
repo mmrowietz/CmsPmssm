@@ -261,7 +261,7 @@ def get_quantile_plot_1D(localtree,analysis,hname,xtitle,xbins,xlow,xup,_logx,dr
             elif qt>0:
                 _quantiles.append(qt)
             else:
-                print "Invalid quantile provided, please use positive values"
+                print ("Invalid quantile provided, please use positive values")
                 exit()
     elif type(quantiles) in [int,float]:
         if quantiles>1:
@@ -269,11 +269,11 @@ def get_quantile_plot_1D(localtree,analysis,hname,xtitle,xbins,xlow,xup,_logx,dr
         elif quantiles>0:
             _quantiles.append(quantiles)
         else:
-            print "Invalid quantile provided, please use positive values"
+            print ("Invalid quantile provided, please use positive values")
             exit()
 
     else:
-        print "invalid type of quantile given, please provide either an int or float, or a list of ints or floats"
+        print ("invalid type of quantile given, please provide either an int or float, or a list of ints or floats")
         exit()
     probs = list(np.array([x]) for x in _quantiles)
     qs = list(np.array([0.]) for x in _quantiles)
@@ -447,7 +447,7 @@ def get_quantile_plot_2D(localtree,quantile,analysis,hname,xtitle,xbins,xlow,xup
     elif quantile>0:
         _quantile = quantile
     else:
-        print "Invalid quantile provided, please use positive values"
+        print ("Invalid quantile provided, please use positive values")
         exit()
 
     _drawstring = theconstraints[analysis]+":"+drawstring
@@ -649,12 +649,6 @@ def run(args):
         outdir+="/"
     if not os.path.exists(outdir):
         os.system("mkdir -p "+outdir)
-    if args.analyses == ["all"]:
-        analyses = ["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006","cms_sus_18_004","cms_sus_21_007","combined"]
-    if args.analyses == ["all_simplified"]:
-        analyses = ["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006_simplified","cms_sus_18_004_simplified","cms_sus_21_007","combined_simplified"]
-    else:
-        analyses = list(args.analyses)
     canvas = mkcanvas("canvas")
 
     gPad.SetRightMargin(0.15) #optional
@@ -664,7 +658,7 @@ def run(args):
     #now make some plots
     gStyle.SetPalette(len(custompalette),custompalette)#We do this because we are only drawing survival probability plots
     #    gStyle.SetPalette(kBird)#uncomment if not drawing survival probability plots
-    """
+    
     hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
     hist.Draw("colz")
     canvas.SaveAs(outdir+"gluino_chi10.png")
@@ -758,7 +752,7 @@ def run(args):
     legend.Draw("same")
     canvas.SaveAs(outdir+"chi10_impact.png")
     legend.Clear()
-    """
+    
     #quantile plots
     #single quantile
     quantile_plots = get_quantile_plot_1D(intree,"combined","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [],quantiles = 0.5)
@@ -797,10 +791,10 @@ if __name__ == "__main__":
     gStyle.SetOptStat(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i","--input",default = "/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/GetLikelihoodForpMSSM/results/full.root",help="Specify the tree containing the points for which you want the survival probability plots")
+    parser.add_argument("-i","--input",default = "/eos/cms/store/group/phys_susy/pMSSMScan/MasterTrees/pmssmtree_11aug2023.root",help="Specify the tree containing the points for which you want the survival probability plots")
     parser.add_argument("-o","--outdir",required = True,help="Specify the output directory")
 #    parser.add_argument("-z","--ztypes",choices=["survival_probability","quantile_Bayesfactor_50","quantile_Bayesfactor_90""quantile_Bayesfactor_98","standard"],help="Specify the types of z-axis quantity",action="append",required = True)
-    parser.add_argument("-a","--analyses",choices=["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006","cms_sus_21_007","cms_sus_21_007_simplified","cms_sus_18_004","combined","all","all_simplified","combined_simplified","cms_sus_18_004_simplified","cms_sus_21_006_simplified"],help="Specify the analyses for which the plots should be made",action="append",required = True)
+    #parser.add_argument("-a","--analyses",choices=["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006","cms_sus_21_007","cms_sus_21_007_simplified","cms_sus_18_004","combined","all","all_simplified","combined_simplified","cms_sus_18_004_simplified","cms_sus_21_006_simplified"],help="Specify the analyses for which the plots should be made",action="append",required = True)
     args = parser.parse_args()
     run(args)
 
