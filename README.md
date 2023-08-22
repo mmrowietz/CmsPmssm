@@ -10,4 +10,5 @@ cd CMSSW_12_2_4/src/
 cmsenv
 cd ../../CmsPmssm
 python3 plotmaker.py -i /eos/cms/store/group/phys_susy/pMSSMScan/MasterTrees/pmssmtree_11aug2023.root -o plots
+##(or at DESY point to /nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/GetLikelihoodForpMSSM/results/full.root)
 ```
