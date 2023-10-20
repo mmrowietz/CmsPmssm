@@ -12,7 +12,17 @@ import argparse
 The purpose of this script is to collect the signal region counts from potentially multiple THnSparses and save them to a tree. Because individual pMSSM models may be distributed across multiple input THnSparses, we first need to collect everything in a dictionary, and then write the tree after the totals for each pMSSM point are known.
 """
 
-
+def get_thnsparse_dimension(hnsparse):
+    """
+    Returns the dimensionality of the ThnSparse input
+    """
+    ndim = hnsparse.GetNdimensions()
+    return ndim
+def get_ntotal_inputtype(output_dictionary):
+    """
+    Returns the method of providing the encountered event totals for the analysis
+    """
+    pass
 def setup_tree(outtree,_output_branches):
     """
     Creates the output branches in the output tree
@@ -65,16 +75,13 @@ def run(args):
     outbranches = importlib.import_module(".".join([args.analysis,"output_branches_treefy"]))
     output_branches = outbranches.output_branches_treefy
 
-    #This 
     infiles = importlib.import_module(".".join([args.analysis,"ThnSparse_inputs"]))
     #the following are dictionaries mapping the input file names for the respective year for the signal regions "sr" and the event totals "ntot" to the respective thnsparse therein
     infiles_sr_2017 = infiles.thnsparses_sr_2017
     infiles_sr_2018 = infiles.thnsparses_sr_2018
     infiles_ntot_2017 = infiles.thnsparses_ntot_2017
     infiles_ntot_2018 = infiles.thnsparses_ntot_2018
-
     #create output file
-
     collect_output = {} #this dictionary collects the output from the various input thnsparses, such that for each pMSSM point there is one dictionary entry with the event counts
 
     if not os.path.exists(homedir+"pMSSMIds.py"):
@@ -91,12 +98,15 @@ def run(args):
         print("running signal regions for year: ",year)
         ix = 1
         for filepath,hnsparsename in hnsparsedict.items():
+
             print("processing file nr. ",ix, " of ",len(hnsparsedict))
             ix+=1
             hnsparsefile = TFile(filepath)
             hnsparse = getattr(hnsparsefile,hnsparsename)
+            thnsparsedim = hnsparse.GetNdimensions()
+            break
             for linix in tqdm(range(hnsparse.GetNbins())):#iterate over LINEAR THnSparse indices. All filled bins in a thnsparse are assigned a unique linear index
-                coordinates = np.intc([0,0,0]) # container with 3D coordinates, filled with THnSparse bin bin coordinates by calling thnsparse.GetBinContent()
+                coordinates = np.intc([0]*thnsparsedim) # container with 3D coordinates, filled with THnSparse bin bin coordinates by calling thnsparse.GetBinContent()
                 #The ThnSparse coordinates are set up such that coordinates is filled with [chain_index,Niteration, SR bin] after GetBinContent is called 
                 count = hnsparse.GetBinContent(linix,coordinates) # get the bin content of the bin with linear index linix, fill "coordinates" with 3D bin coordinates
                 #Check if the bin corresponds to a valid pMSSM point. Uncomment below if check is desired
@@ -113,26 +123,39 @@ def run(args):
                         #it is possible that the pMSSM point was already encountered, but for a different data taking year
                         collect_output[(int(coordinates[0]),int(coordinates[1]))][year]={}
 
-                if not output_branches[coordinates[2]]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:# if this is the first time the pMSSM model is encountered, set signal region counts in dictionary.
-                    #The following line seems waaaaaaaay too nested to be understandable. I may make sense to simplify this in the future.
-                    #for now: the structure of collect_output is: collect_output[(ID1,ID2)][year][outputBranchName]
-                    collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[coordinates[2]]["name_"+year]] = count 
-                else:
-                    collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[coordinates[2]]["name_"+year]] += count# if there already is a signal event count, add the newly encountered events
+                #This needs to add a layer for every dimension above 2. This will be painful to implement. Assume for now that only 3 or 4 are possible.
+                if thnsparsedim == 3:
+                    if not output_branches[coordinates[2]]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:# if this is the first time the pMSSM model is encountered, set signal region counts in dictionary.
+                        #The following line seems waaaaaaaay too nested to be understandable. I may make sense to simplify this in the future.
+                        #for now: the structure of collect_output is: collect_output[(ID1,ID2)][year][outputBranchName]
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[coordinates[2]]["name_"+year]] = count 
+                    else:
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[coordinates[2]]["name_"+year]] += count# if there already is a signal event count, add the newly encountered events
+                elif thnsparsedim > 3:#this case assumes that the dictionary keys in output_branches_treefy.py are tuples of the sr bin coordinates
+                    if not output_branches[tuple(coordinates[2-thnsparsedim:])]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][tuple(coordinates[2-thnsparsedim:])]["name_"+year] = count
+                    else:
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][tuple(coordinates[2-thnsparsedim:])]["name_"+year] += count
+                            
             hnsparsefile.Close()
     #repeat the thing for the event totals. If the event totals are provided in a signal region bin above, the code above needs to be modified.
+    #only do this if the event totals are in a separate THnSparse
+    
     for year, hnsparsedict in {"2017":infiles_ntot_2017,"2018":infiles_ntot_2018}.items():
         print("running event totals for year: ",year)
         ix = 1
         for filepath,hnsparsename in hnsparsedict.items():
             print("processing file nr. ",ix, " of ",len(hnsparsedict))
             ix+=1
-#            if ix>2:
-#                break
             hnsparsefile = TFile(filepath)
             hnsparse = getattr(hnsparsefile,hnsparsename)
+            thnsparsedim = hnsparse.GetNdimensions()
+            #check whether this thnsparse contains only a single bin along the last axis
+            if thnsparsedim>2 and hnsparse.GetAxis(thnsparsedim-1).GetNbins()>1:
+                print("The presumed axis containing the event totals has more than one bin. It is assumed that the event totals are in the ThnSparse as the signal region event counts, in which case this step of the script has to and is skipped.")
+                break
             for linix in tqdm(range(hnsparse.GetNbins())):#iterate over LINEAR THnSparse indices. All filled bins in a thnsparse are assigned a unique linear index
-                coordinates = np.intc([0,0,0]) # container with 3D coordinates, filled with THnSparse bin bin coordinates by calling thnsparse.GetBinContent()
+                coordinates = np.intc([0]*thnsparsedim) # container with 3D coordinates, filled with THnSparse bin bin coordinates by calling thnsparse.GetBinContent()
                 #The ThnSparse coordinates are set up such that coordinates is filled with [chain_index,Niteration, SR bin] after GetBinContent is called 
                 count = hnsparse.GetBinContent(linix,coordinates) # get the bin content of the bin with linear index linix, fill "coordinates" with 3D bin coordinates
                 #FIXME: test if the thnsparse binning is correct - which is the min and max coordinate 3?
@@ -149,10 +172,16 @@ def run(args):
                         #it is possible that the pMSSM point was already encountered, but for a different data taking year
                         collect_output[(int(coordinates[0]),int(coordinates[1]))][year]={}
                 # for some reason, coordinates[2] is offset by one from the expected. This may need some investigating. In any case, ALWAYS be careful with the THnSparse binning and double-check that it is correct
-                if not output_branches[str(coordinates[2]-1)]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:# if this is the first time the pMSSM model is encountered, set signal region counts in dictionary.
-                    collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[str(coordinates[2]-1)]["name_"+year]] = count 
-                else:
-                    collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[str(coordinates[2]-1)]["name_"+year]] += count# if there already is a signal event count, add the newly encountered events
+                if thnsparsedim == 3:
+                    if not output_branches[str(coordinates[2]-1)]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:# if this is the first time the pMSSM model is encountered, set signal region counts in dictionary.
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[str(coordinates[2]-1)]["name_"+year]] = count 
+                    else:
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][output_branches[str(coordinates[2]-1)]["name_"+year]] += count# if there already is a signal event count, add the newly encountered events
+                elif thnsparsedim > 3:#this case assumes that the dictionary keys in output_branches_treefy.py are tuples of the sr bin coordinates
+                    if not output_branches[tuple(coordinates[2-thnsparsedim:]-[1]*(2-thnsparsedim))]["name_"+year] in collect_output[(int(coordinates[0]),int(coordinates[1]))][year]:#this might need to be offset by 1, which is problematic with tuples. The part "-[1]*(2-thnsparsedim)" is supposed to substract from the coordinates array before tupleizing
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][tuple(coordinates[2-thnsparsedim:]-[1]*(2-thnsparsedim))]["name_"+year] = count
+                    else:
+                        collect_output[(int(coordinates[0]),int(coordinates[1]))][year][tuple(coordinates[2-thnsparsedim:]-[1]*(2-thnsparsedim))]["name_"+year] += count
 
     #We now have a dictionary containing the signal region and total event counts for each pMSSM point, identified by its two IDs
 
