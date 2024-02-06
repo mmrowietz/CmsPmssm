@@ -791,7 +791,8 @@ if __name__ == "__main__":
     gStyle.SetOptStat(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i","--input",default = "/eos/cms/store/group/phys_susy/pMSSMScan/MasterTrees/pmssmtree_11aug2023.root",help="Specify the tree containing the points for which you want the survival probability plots")
+    #parser.add_argument("-i","--input",default = "/eos/cms/store/group/phys_susy/pMSSMScan/MasterTrees/pmssmtree_11aug2023.root",help="Specify the tree containing the points for which you want the survival probability plots")
+    parser.add_argument("-i","--input",default = "/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/GetLikelihoodForpMSSM/results/full.root",help="Specify the tree containing the points for which you want the survival probability plots")
     parser.add_argument("-o","--outdir",required = True,help="Specify the output directory")
 #    parser.add_argument("-z","--ztypes",choices=["survival_probability","quantile_Bayesfactor_50","quantile_Bayesfactor_90""quantile_Bayesfactor_98","standard"],help="Specify the types of z-axis quantity",action="append",required = True)
     #parser.add_argument("-a","--analyses",choices=["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006","cms_sus_21_007","cms_sus_21_007_simplified","cms_sus_18_004","combined","all","all_simplified","combined_simplified","cms_sus_18_004_simplified","cms_sus_21_006_simplified"],help="Specify the analyses for which the plots should be made",action="append",required = True)

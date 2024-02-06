@@ -162,7 +162,8 @@ def graphStyler(g,color,width = 2,mstyle = 8):
     g.GetXaxis().SetTitleOffset(1.0)
     g.GetYaxis().SetTitleOffset(1.05)
     
-def mkcanvas(name,left=0.14,right=False,top=0.22,bottom=0.15):
+#def mkcanvas(name,left=0.14,right=False,top=0.22,bottom=0.15):
+def mkcanvas(name,left=0.14,right=False,top=0.02,bottom=0.15):
     c1 = TCanvas(name,name,700,630)
     
     c1.SetBottomMargin(bottom)
