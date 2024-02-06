@@ -1,0 +1,35 @@
+imax    1 number of bins
+jmax    3 number of processes minus 1
+kmax    * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes * sos_3l_cr_wz_med sos_3l_cr_wz_med.root sos_3l_cr_wz_med/$PROCESS sos_3l_cr_wz_med/$PROCESS_$SYSTEMATIC
+--------------------------------------------------------------------------------
+bin          sos_3l_cr_wz_med 
+observation  263.0           
+--------------------------------------------------------------------------------
+bin                        sos_3l_cr_wz_med sos_3l_cr_wz_med sos_3l_cr_wz_med sos_3l_cr_wz_med 
+process                    prompt_wz       prompt_vv       FRfakes_data    Rares           
+process                    1               2               3               4               
+rate                       299.202         6.3733          20.1499         15.2136         
+--------------------------------------------------------------------------------
+CMS_btag_cferr1    shape   1               1               -               1               
+CMS_btag_cferr2    shape   1               1               -               1               
+CMS_btag_hf        shape   1               1               -               1               
+CMS_btag_hfstats1  shape   1               1               -               1               
+CMS_btag_hfstats2  shape   1               1               -               1               
+CMS_btag_lf        shape   1               1               -               1               
+CMS_btag_lfstats1  shape   1               1               -               1               
+CMS_btag_lfstats2  shape   1               1               -               1               
+CMS_res_j          shape   1               1               1               1               
+CMS_scale_j        shape   1               1               -               1               
+PU                 shape   1               1               -               1               
+TriggerSF_3l_18    shape   1               1               -               1               
+lepSF_1            shape   1               1               -               1               
+lepSF_2            shape   1               1               -               1               
+lepSF_3            shape   1               1               -               1               
+lumi_13TeV_2018    lnN     1.025           1.025           -               1.025           
+norm_fakes         lnN     -               -               1.4             -               
+norm_rares         lnN     -               -               -               1.5             
+norm_vv            lnN     -               1.5             -               -               
+norm_wz_med_18_lnU lnU     2               -               -               -               
+sos_3l_cr_wz_med autoMCStats 10 0 1

@@ -1,0 +1,37 @@
+imax    1 number of bins
+jmax    6 number of processes minus 1
+kmax    * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes * sos_2los_sr_med sos_2los_sr_med.root sos_2los_sr_med/$PROCESS sos_2los_sr_med/$PROCESS_$SYSTEMATIC
+--------------------------------------------------------------------------------
+bin          sos_2los_sr_med 
+observation  47.0            
+--------------------------------------------------------------------------------
+bin                        sos_2los_sr_med       sos_2los_sr_med sos_2los_sr_med sos_2los_sr_med sos_2los_sr_med sos_2los_sr_med sos_2los_sr_med 
+process                    Signal                prompt_tt       prompt_dy       prompt_wz       prompt_vv       semidd_fakes    Rares           
+process                    0                     1               2               3               4               5               6               
+rate                       nsig                  4.64544         3.19089         3.93624         2.05242         34.678          0.309767        
+-------------------------------------------      -----------------------------------------------------
+CMS_btag_cferr1    shape   -                     1               1               1               1               -               1               
+CMS_btag_cferr2    shape   -                     1               1               1               1               -               1               
+CMS_btag_hf        shape   -                     1               1               1               1               -               1               
+CMS_btag_hfstats1  shape   -                     1               1               1               1               -               1               
+CMS_btag_hfstats2  shape   -                     1               1               1               1               -               1               
+CMS_btag_lf        shape   -                     1               1               1               1               -               1               
+CMS_btag_lfstats1  shape   -                     1               1               1               1               -               1               
+CMS_btag_lfstats2  shape   -                     1               1               1               1               -               1               
+CMS_res_j          shape   -                     1               1               1               1               1               1               
+CMS_scale_j        shape   -                     1               1               1               1               -               1               
+PU                 shape   -                     1               1               1               1               -               1               
+Prefire_16         shape   -                     1               1               1               1               -               1               
+TriggerSF_2l_16    lnN     -                     0.95/1.05       0.95/1.05       0.95/1.05       0.95/1.05       -               0.95/1.05       
+lepSF_1            shape   -                     1               1               1               1               -               1               
+lepSF_2            shape   -                     1               1               1               1               -               1               
+lumi_13TeV_2016    lnN     1.025                 1.025           1.025           1.025           1.025           -               1.025           
+norm_dy_med_16_lnU lnU     -                     -               2               -               -               -               -               
+norm_fakes         lnN     -                     -               -               -               -               1.4             -               
+norm_rares         lnN     -                     -               -               -               -               -               1.5             
+norm_tt_med_16_lnU lnU     -                     2               -               -               -               -               -               
+norm_vv            lnN     -                     -               -               -               1.5             -               -               
+norm_wz_med_16_lnU lnU     -                     -               -               2               -               -               -               
+sos_2los_sr_med autoMCStats 10 0 1

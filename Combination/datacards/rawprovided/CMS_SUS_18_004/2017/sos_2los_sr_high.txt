@@ -1,0 +1,38 @@
+imax    1 number of bins
+jmax    5 number of processes minus 1
+kmax    * number of nuisance parameters
+--------------------------------------------------------------------------------
+shapes * sos_2los_sr_high sos_2los_sr_high.root sos_2los_sr_high/$PROCESS sos_2los_sr_high/$PROCESS_$SYSTEMATIC
+--------------------------------------------------------------------------------
+bin          sos_2los_sr_high 
+observation  20.0            
+--------------------------------------------------------------------------------
+bin                           sos_2los_sr_high sos_2los_sr_high sos_2los_sr_high sos_2los_sr_high sos_2los_sr_high sos_2los_sr_high 
+process                       prompt_tt       prompt_dy       prompt_wz       prompt_vv       semidd_fakes    Rares           
+process                       1               2               3               4               5               6               
+rate                          2.94287         1.30564         1.87227         1.23898         12.1651         0.027865        
+--------------------------------------------------------------------------------
+CMS_btag_cferr1       shape   1               1               1               1               -               1               
+CMS_btag_cferr2       shape   1               1               1               1               -               1               
+CMS_btag_hf           shape   1               1               1               1               -               1               
+CMS_btag_hfstats1     shape   1               1               1               1               -               1               
+CMS_btag_hfstats2     shape   1               1               1               1               -               1               
+CMS_btag_lf           shape   1               1               1               1               -               1               
+CMS_btag_lfstats1     shape   1               1               1               1               -               1               
+CMS_btag_lfstats2     shape   1               1               1               1               -               1               
+CMS_res_j             shape   1               1               1               1               1               1               
+CMS_scale_j           shape   1               1               1               1               -               1               
+PU                    shape   1               1               1               1               -               1               
+Prefire_17            shape   1               1               1               1               -               1               
+TriggerSF_2l_17       shape   1               1               1               1               -               1               
+lepSF_1               shape   1               1               1               1               -               1               
+lepSF_2               shape   1               1               1               1               -               1               
+lumi_13TeV_2017       lnN     1.023           1.023           1.023           1.023           -               1.023           
+norm_dy_med_17_lnU    lnU     -               2               -               -               -               -               
+norm_fakes            lnN     -               -               -               -               1.4             -               
+norm_rares            lnN     -               -               -               -               -               1.5             
+norm_tt_med_17_lnU    lnU     2               -               -               -               -               -               
+norm_vv               lnN     -               -               -               1.5             -               -               
+norm_wz_med_17_lnU    lnU     -               -               2               -               -               -               
+shape_mllInclInMET_17 shape   -               -               -               -               1               -               
+sos_2los_sr_high autoMCStats 10 0 1
