@@ -4,11 +4,11 @@ from utils import *
 #from tqdm import tqdm
 import argparse
 import numpy as np
+import math
 
 
 #some useful shorthand maps to tree branches
 terms = {}
-terms 
 terms["higgsino"] = "(Re_N_13**2+Re_N_14**2)"
 terms["bino"] = "Re_N_11**2"
 terms["wino"] = "Re_N_12**2"
@@ -29,6 +29,10 @@ theconstraints["cms_sus_19_006_up"] = "(exp(llhd_cms_sus_19_006_150s-llhd_cms_su
 theconstraints["cms_sus_18_004_simplified"] = "(exp(llhd_cms_sus_18_004_100s-llhd_cms_sus_18_004_0s))"
 theconstraints["cms_sus_18_004_simplified_down"] = "(exp(llhd_cms_sus_18_004_050s-llhd_cms_sus_18_004_0s))"
 theconstraints["cms_sus_18_004_simplified_up"] = "(exp(llhd_cms_sus_18_004_150s-llhd_cms_sus_18_004_0s))"
+
+theconstraints["cms_sus_19_006_simplified"] = "(max(1E-5,bf_cms_sus_19_006_mu1p0s))"
+theconstraints["cms_sus_19_006_simplified_down"] = "(max(1E-5,bf_cms_sus_19_006_mu0p5s))"
+theconstraints["cms_sus_19_006_simplified_up"] = "(max(1E-5,bf_cms_sus_19_006_mu1p5s))"
 
 #At some point we switches to saving the Bayes factor directly in the tree, instead of the signal and signal-less likelihoods
 #Here, muXpYf refers to signal strength of X.Y, and f refers to "full" as in full combine likelihood. The max sometimes has to be taken because root can't handle extremely small floats.
@@ -79,6 +83,9 @@ bfs_up.append("(max(bf_cms_sus_21_006_mu1p5f,1E-20))")
 bfs.append("(max(bf_cms_sus_18_004_mu1p0f,1E-20))")
 bfs_down.append("(max(bf_cms_sus_18_004_mu0p5f,1E-20))")
 bfs_up.append("(max(bf_cms_sus_18_004_mu1p5f,1E-20))")
+bfs.append("(max(bf_cms_sus_19_006_mu1p0s,1E-20))")
+bfs_down.append("(max(bf_cms_sus_19_006_mu0p5s,1E-20))")
+bfs_up.append("(max(bf_cms_sus_19_006_mu1p5s,1E-20))")
 
 bfs_no_cms_sus_21_006 = []
 bfs_no_cms_sus_21_006_down = []
@@ -95,13 +102,13 @@ bfs_no_cms_sus_18_004_down.append("(max(bf_cms_sus_21_006_mu0p5f,1E-20))")
 bfs_no_cms_sus_18_004_up.append("(max(bf_cms_sus_21_006_mu1p5f,1E-20))")
 
 #We only started storing the Bayes factors for the full combine likelihoods, so the simplified version is simpler
-signals_simplified = "+".join(["llhd_cms_sus_19_006_100s","llhd_atlas_susy_2018_32_100s","llhd_atlas_susy_2018_06_100s","llhd_cms_sus_21_006_100s","llhd_cms_sus_18_004_100s"])
+signals_simplified = "+".join(["llhd_cms_sus_21_006_100s","llhd_cms_sus_18_004_100s"])
 signals_simplified_down = "+".join(["llhd_cms_sus_19_006_050s","llhd_atlas_susy_2018_32_050s","llhd_atlas_susy_2018_06_050s","llhd_cms_sus_21_006_050s","llhd_cms_sus_18_004_050s"])
 signals_simplified_up = "+".join(["llhd_cms_sus_19_006_150s","llhd_atlas_susy_2018_32_150s","llhd_atlas_susy_2018_06_150s","llhd_cms_sus_21_006_150s","llhd_cms_sus_18_004_150s"])
 _backgrounds_simplified = "+".join(["llhd_cms_sus_19_006_0s","llhd_atlas_susy_2018_32_0s","llhd_atlas_susy_2018_06_0s","llhd_cms_sus_21_006_0s","llhd_cms_sus_18_004_0s"])
 
 #these are the Bayes factors for the combination of all analyses. The first term handles the analyses where the log likelihood is stored, the second term handles the analyses where the Bayes factor is stored in the tree 
-theconstraints["combined"] = "(exp(("+signals+")-("+_backgrounds+"))*"+"*".join(bfs)+")"
+theconstraints["combined"] = "("+"*".join(bfs)+")"
 theconstraints["combined_simplified"] = "(exp(("+signals_simplified+")-("+_backgrounds_simplified+")))"
 #some useful constraints
 theconstraints["pure higgsino"] = "("+terms["higgsino"]+">0.95)"
@@ -112,7 +119,9 @@ theconstraints["bino-wino mix"] = "(!("+"||".join([theconstraints["pure bino"],t
 theconstraints["bino-higgsino mix"] = "(!("+"||".join([theconstraints["pure bino"],theconstraints["pure wino"],theconstraints["pure higgsino"]])+") && "+terms["bino"]+">"+terms["wino"]+" && "+terms["higgsino"]+">"+terms["wino"]+")"
 theconstraints["wino-higgsino mix"] = "(!("+"||".join([theconstraints["pure bino"],theconstraints["pure wino"],theconstraints["pure higgsino"]])+") && "+terms["bino"]+"<"+terms["wino"]+" && "+terms["bino"]+"<"+terms["higgsino"]+")"
 
-
+#additional constraints
+theconstraints["DD"] ="(dd_exclusion_pval>=0.05)"
+theconstraints["RD0"] ="(Omegah2<=0.132)"
 
 #z-axis colors
 sprobcontours = np.float64([-0.01,1E-5,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1-1E-5,1.01])
@@ -130,9 +139,26 @@ for i in range(cols):
     custompalette.append(col)
 custompalette = np.intc(custompalette)
 
-#dictionary mapping the z-scores for the different analyses to the tree branches 
+#dictionary mapping the z-scores for the different analyses to the tree branches
+def get_Zsig(bayesfactors,inputtype = "Bayesfactors"):
+    """
+    Returns a string that corresponds to the combined Z significance for the input Bayes factors when used in conjunction with TTree.Draw()
+    @param bayesfactors: list of Bayes factors or log likelihood (llhd) differences from which to calculate the Z significance. If log likelihoods are preferred, provide a list of tuples [(llhd_analysis1_mu=mu',llhd_analysis1_mu=0'),(llhd_analysis2_mu=mu',llhd_analysis2_mu=0'),(...,...),...]
+    @param inputtype: type of list elements for @param bayesfactors. Can be "Bayesfactors" or "llhd"
+    """
+    if inputtype == "Bayesfactors":
+        return "(("+"*".join(bayesfactors)+"-1"+")/(abs("+"*".join(bayesfactors)+"-1)) * sqrt(2*abs(log("+"*".join(bayesfactors)+"))))"
+    elif inputtype == "llhd":
+        terms = "("
+        for llhds in bayesfactors:
+            terms+="("+"-".join(llhds)+")"
+        terms+=")"
+        return "(("+terms+")/(abs("+terms+")) * sqrt(2*abs("+terms+")))"
+    else:
+        print('Please use either "Bayesfactors" or "llhd" as input type')
+        return False
 branchnames = {}
-for analysis in ["cms_sus_19_006","cms_sus_21_006","cms_sus_18_004","atlas_susy_2018_32","atlas_susy_2018_06","combined","cms_sus_21_006_simplified","cms_sus_21_007","cms_sus_21_007_simplified"]:
+for analysis in ["cms_sus_19_006","cms_sus_19_006_simplified","cms_sus_21_006","cms_sus_18_004","cms_sus_18_004_simplified","atlas_susy_2018_32","atlas_susy_2018_06","combined","cms_sus_21_006_simplified","cms_sus_21_007","cms_sus_21_007_simplified"]:
     branchnames[analysis] = {}
     branchnames[analysis+"_up"] = {}
     branchnames[analysis+"_down"] = {}
@@ -141,13 +167,28 @@ for analysis in ["cms_sus_19_006","cms_sus_21_006","cms_sus_18_004","atlas_susy_
         branchnames[analysis]["Z"] = "Zsig_"+analysis+"_mu1p0f"
         branchnames[analysis+"_up"]["Z"] = "Zsig_"+analysis+"_mu1p5f"
         branchnames[analysis+"_down"]["Z"] = "Zsig_"+analysis+"_mu0p5f"
-    elif analysis == "combined_simplified":
-        branchnames[analysis]["Z"] = "Zsig_"+analysis
+    elif analysis == "cms_sus_19_006_simplified":
+        branchnames[analysis]["Z"] = "Zsig_"+analysis.replace("_simplified","")+"_mu1p0s"
+        branchnames[analysis+"_up"]["Z"] = "Zsig_"+analysis.replace("_simplified","")+"_mu1p5s"
+        branchnames[analysis+"_down"]["Z"] = "Zsig_"+analysis.replace("_simplified","")+"_mu0p5s"
+    elif analysis == "combined":
+        branchnames[analysis]["Z"] = "(("+"*".join(bfs)+"-1"+")/(abs("+"*".join(bfs)+"-1)) * sqrt(2*abs(log("+"*".join(bfs)+"))))"
     else:
         branchnames[analysis]["Z"] = "Zsig_"+analysis.replace("_simplified","")
         branchnames[analysis+"_up"]["Z"] = "Zsig_"+analysis.replace("_simplified","")+"_15s"
         branchnames[analysis+"_down"]["Z"] = "Zsig_"+analysis.replace("_simplified","")+"_05s"
-
+    
+def add_friends(_localtree,analyses):
+    """
+    Add the friend trees for the analysis likelihoods to the main tree
+    @param _localtree: the main tree to which to add the likelihood trees as friend
+    @param analyses: list of analyses to add to the main tree
+    """
+    if type(analyses)!=list:
+        print("Invalid type for parameter analyses. Provide a list of analyses to add. [analysis] for a single analysis" )
+        return False
+    if "cms_sus_19_006" in analyses:
+        _localtree.AddFriend("cms_sus_19_006",TFile("/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/beautiful_scripts/CmsPmssm/cms_sus_19_006/likelihood_cms_sus_19_006.root"))
 def get_impact_plots(localtree,analysis,hname,xtitle,xbins,xlow,xup,_logx,drawstring,moreconstraints = [],moreconstraints_prior = False):
     """
     This creates an impact plot. Returns dictionary with four histograms: the prior, posterior, as well as the +-50% cross section versions of the posterior.
@@ -261,7 +302,7 @@ def get_quantile_plot_1D(localtree,analysis,hname,xtitle,xbins,xlow,xup,_logx,dr
             elif qt>0:
                 _quantiles.append(qt)
             else:
-                print ("Invalid quantile provided, please use positive values")
+                print "Invalid quantile provided, please use positive values"
                 exit()
     elif type(quantiles) in [int,float]:
         if quantiles>1:
@@ -269,11 +310,11 @@ def get_quantile_plot_1D(localtree,analysis,hname,xtitle,xbins,xlow,xup,_logx,dr
         elif quantiles>0:
             _quantiles.append(quantiles)
         else:
-            print ("Invalid quantile provided, please use positive values")
+            print "Invalid quantile provided, please use positive values"
             exit()
 
     else:
-        print ("invalid type of quantile given, please provide either an int or float, or a list of ints or floats")
+        print "invalid type of quantile given, please provide either an int or float, or a list of ints or floats"
         exit()
     probs = list(np.array([x]) for x in _quantiles)
     qs = list(np.array([0.]) for x in _quantiles)
@@ -447,7 +488,7 @@ def get_quantile_plot_2D(localtree,quantile,analysis,hname,xtitle,xbins,xlow,xup
     elif quantile>0:
         _quantile = quantile
     else:
-        print ("Invalid quantile provided, please use positive values")
+        print "Invalid quantile provided, please use positive values"
         exit()
 
     _drawstring = theconstraints[analysis]+":"+drawstring
@@ -639,11 +680,20 @@ def get_posterior_CI(localtree,analysis,hname,xbins,xlow,xup,ybins,ylow,yup,_log
     return the_contours
 
 
+limits = {}
+limits["T1qqqq"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T1qqqq.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T1tttt"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T1tttt.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T1bbbb"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T1bbbb.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T5qqqqVV"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T5qqqqVV.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T2qq"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T2qq.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T2tt"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T2tt.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
+limits["T2bb"] = {"file":"/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/thesisplots/python/smslimits/cms_sus_19_006/CMS_SUS_19_006_T2bb.root","lim":"ObsLim","up":"ObsLimSup","down":"ObsLimSdn"}
 
 def run(args):
     #setup
     infile = TFile(args.input)
     intree=infile.Get("mcmc")
+    add_friends(intree,["cms_sus_19_006"])
     outdir = args.outdir
     if outdir[-1]!="/":
         outdir+="/"
@@ -653,31 +703,32 @@ def run(args):
 
     gPad.SetRightMargin(0.15) #optional
     gPad.SetLeftMargin(0.15) #optional
-    legend = mklegend(0.2,0.8,0.85,0.99) #optional, can also use default constructor below
+    legend = mklegend(0.2,0.82,0.85,0.99) #optional, can also use default constructor below
 #    legend = mklegend()
     #now make some plots
     gStyle.SetPalette(len(custompalette),custompalette)#We do this because we are only drawing survival probability plots
     #    gStyle.SetPalette(kBird)#uncomment if not drawing survival probability plots
-    
-    hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
+    """
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
     hist.Draw("colz")
     canvas.SaveAs(outdir+"gluino_chi10.png")
     hist.Delete()#you may run into trouble if you use the same histogram name twice or more unless you actively delete the previous version
     #with higgsino-like LSP
-    hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95"])
+
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95"])
     hist.Draw("colz")
     canvas.SaveAs(outdir+"gluino_chi10_higgsino.png")
     hist.Delete()
     #with higgsino-like LSP and correct-ish relic density within 10%
-    hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])
     hist.Draw("colz")
     canvas.SaveAs(outdir+"gluino_chi10_higgsino_RDPlanck.png")
     hist.Delete()
     #adding contours
     #without constraints
-    hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
     priorconts = get_prior_CI(intree,"gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g")
-    posteriorconts = get_posterior_CI(intree,"combined","gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g")
+    posteriorconts = get_posterior_CI(intree,"cms_sus_19_006_simplified","gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g")
     hist.Draw("colz")
     for ix,interval in enumerate(priorconts):
         for cont in priorconts[interval]:
@@ -694,13 +745,37 @@ def run(args):
     legend.SetNColumns(2)
     legend.Draw("same")
     canvas.SaveAs(outdir+"gluino_chi10_contoured.png")
+    hist.Delete()
+    legend.Clear()
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","dM_chi1pm_chi10_chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,"#Deltam(#tilde{#chi}^{#pm}_{1},#tilde{#chi}^{0}_{1}) [GeV]",100,1E-3,4000,False,True,"chi1pm-abs(chi10):abs(chi10)")
+    priorconts = get_prior_CI(intree,"dM_chi1pm_chi10_chi10_priorcontours",60,0,3000,100,1E-3,4000,False,True,"chi1pm-abs(chi10):abs(chi10)")
+    posteriorconts = get_posterior_CI(intree,"cms_sus_19_006_simplified","dM_chi1pm_chi10_chi10_priorcontours",60,0,3000,100,1E-3,4000,False,True,"chi1pm-abs(chi10):abs(chi10)")
+    canvas.SetLogy()
+    hist.Draw("colz")
+    for ix,interval in enumerate(priorconts):
+        for cont in priorconts[interval]:
+            cont.Draw("same")
+    for ix,interval in enumerate(posteriorconts):
+        for cont in posteriorconts[interval]:
+            cont.Draw("same")
+    for ix,interval in enumerate(priorconts):
+        if len(priorconts[interval])>0:
+            legend.AddEntry(priorconts[interval][0],str(int(100*(interval)))+"%  prior CI","l",)
+        if len(posteriorconts[interval])>0:
+            legend.AddEntry(posteriorconts[interval][0],str(int(100*(interval)))+"% posterior CI","l",)
+
+    legend.SetNColumns(2)
+    legend.Draw("same")
+    canvas.SaveAs(outdir+"dM_chi1pm_chi10_chi10_contoured.png")
+    
     legend.Clear()
     legend.SetNColumns(1)
     hist.Delete()
+    canvas.SetLogy(False)
     #with constraints
-    hist = get_SP_plot_2D(intree,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])
+    hist = get_SP_plot_2D(intree,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])
     priorconts = get_prior_CI(intree,"gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])
-    posteriorconts = get_posterior_CI(intree,"combined","gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])   
+    posteriorconts = get_posterior_CI(intree,"cms_sus_19_006_simplified","gluino_chi10_priorcontours",100,0,10000,60,0,3000,False,False,"abs(chi10):g",["(Re_N_13**2+Re_N_14**2)>0.95","abs(Omegah2-0.12)<=0.012"])   
     hist.Draw("colz")
     for ix,interval in enumerate(priorconts):
         for cont in priorconts[interval]:
@@ -721,7 +796,7 @@ def run(args):
     hist.Delete()
     #now some quantile plots
     gStyle.SetPalette(kBird)
-    hist = get_quantile_plot_2D(intree,0.5,"combined","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
+    hist = get_quantile_plot_2D(intree,0.5,"cms_sus_19_006_simplified","gluino_chi10","m(#tilde{g}) [GeV]",100,0,10000,"m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,2500,False,False,"abs(chi10):g")
     hist.Draw("colz")
     canvas.SaveAs(outdir+"gluino_chi10_BF50.png")
     hist.Delete()
@@ -729,7 +804,7 @@ def run(args):
     
     #1D survival probabilities
             
-    SP_plots = get_SP_plot_1D(intree,"combined","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [])
+    SP_plots = get_SP_plot_1D(intree,"cms_sus_19_006_simplified","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [])
     legend.AddEntry(SP_plots["posterior"],"#sigma = #sigma_{nominal}")
     legend.AddEntry(SP_plots["posterior_up"],"#sigma = 1.5#times#sigma_{nominal}")
     legend.AddEntry(SP_plots["posterior_down"],"#sigma =0.5#times#sigma_{nominal}")
@@ -740,7 +815,7 @@ def run(args):
     canvas.SaveAs(outdir+"chi10.png")
     legend.Clear()
     #1D impact
-    impact_plots = get_impact_plots(intree,"combined","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [])
+    impact_plots = get_impact_plots(intree,"cms_sus_19_006_simplified","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [])
     legend.AddEntry(impact_plots["prior"],"prior")
     legend.AddEntry(impact_plots["posterior"],"posterior (#sigma = 1.5#times#sigma_{nominal})")
     legend.AddEntry(impact_plots["posterior_up"],"posterior (#sigma = 1.5#times#sigma_{nominal})")
@@ -752,10 +827,9 @@ def run(args):
     legend.Draw("same")
     canvas.SaveAs(outdir+"chi10_impact.png")
     legend.Clear()
-    
     #quantile plots
     #single quantile
-    quantile_plots = get_quantile_plot_1D(intree,"combined","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [],quantiles = 0.5)
+    quantile_plots = get_quantile_plot_1D(intree,"cms_sus_19_006_simplified","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [],quantiles = 0.5)
     legend.AddEntry(quantile_plots["quantile_50"],"median")#the retuned quantile name uses percentile -> quantile=0.5 becomes 'quantile_50'
     quantile_plots["quantile_50"].Draw("hist")
     legend.Draw("same")
@@ -764,7 +838,7 @@ def run(args):
     #multiple quantiles
     legend.Clear()
     quantile_plots["quantile_50"].Delete()
-    quantile_plots = get_quantile_plot_1D(intree,"combined","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [],quantiles = [0.5,0.75,0.9,0.99])
+    quantile_plots = get_quantile_plot_1D(intree,"cms_sus_19_006_simplified","chi10","m(#tilde{#chi}^{0}_{1}) [GeV]",50,0,1500,False,"abs(chi10)",moreconstraints = [],quantiles = [0.5,0.75,0.9,0.99])
     legend.AddEntry(quantile_plots["quantile_50"],"50th percentile") #the retuned quantile name uses percentile -> quantile=0.5 becomes 'quantile_50'
     legend.AddEntry(quantile_plots["quantile_75"],"75th percentile")
     legend.AddEntry(quantile_plots["quantile_90"],"90th percentile")
@@ -785,17 +859,16 @@ def run(args):
     legend.Draw("same")
     canvas.SaveAs(outdir+"chi10_quantiles.png")
 
-
+    """
+    
 if __name__ == "__main__":
     gROOT.SetBatch(True)
     gStyle.SetOptStat(0)
 
     parser = argparse.ArgumentParser()
-    #parser.add_argument("-i","--input",default = "/eos/cms/store/group/phys_susy/pMSSMScan/MasterTrees/pmssmtree_11aug2023.root",help="Specify the tree containing the points for which you want the survival probability plots")
     parser.add_argument("-i","--input",default = "/nfs/dust/cms/user/mrowietm/output_pMSSMscan_new/python/GetLikelihoodForpMSSM/results/full.root",help="Specify the tree containing the points for which you want the survival probability plots")
     parser.add_argument("-o","--outdir",required = True,help="Specify the output directory")
-#    parser.add_argument("-z","--ztypes",choices=["survival_probability","quantile_Bayesfactor_50","quantile_Bayesfactor_90""quantile_Bayesfactor_98","standard"],help="Specify the types of z-axis quantity",action="append",required = True)
-    #parser.add_argument("-a","--analyses",choices=["cms_sus_19_006","atlas_susy_2018_32","atlas_susy_2018_06","cms_sus_21_006","cms_sus_21_007","cms_sus_21_007_simplified","cms_sus_18_004","combined","all","all_simplified","combined_simplified","cms_sus_18_004_simplified","cms_sus_21_006_simplified"],help="Specify the analyses for which the plots should be made",action="append",required = True)
+
     args = parser.parse_args()
     run(args)
 

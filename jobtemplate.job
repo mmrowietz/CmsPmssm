@@ -1,0 +1,8 @@
+universe = vanilla
+Executable = %(SETENVNAME)s
+Should_Transfer_Files = IF_NEEDED
+when_to_transfer_output = ON_EXIT
+Output = %(JOBDIR)s%(OUTFILENAME)s.out
+Error = %(JOBDIR)s%(OUTFILENAME)s.err
+Log = %(JOBDIR)s%(OUTFILENAME)s.log
+Queue 1

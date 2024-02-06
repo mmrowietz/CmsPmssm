@@ -1,0 +1,48 @@
+#need to map the filename to the thnsparse name!
+rootdir = "/nfs/dust/cms/user/beinsam/pMSSM13TeV/Scan2/Combination/CMSSW_10_2_13/src/THnSparses/CMS_SUS_19_006/Run2ProductionV17_v1/"
+thnsparses_sr_2017 = {}
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set1LL_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set1LL_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set1prompt1_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt1_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set1prompt2_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt2_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set1prompt3_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt3_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set2LL1_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set2LL1_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set2LL2_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set2LL2_MC2017_nominal"
+thnsparses_sr_2017[rootdir+"RA2bin_signal_pMSSM_set2prompt1_MC2017_fast.root"] = "id1_id2_RA2bin_pMSSM_set2prompt1_MC2017_nominal"
+
+thnsparses_sr_2018 = {}
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1LL_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set1LL_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1LL_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set1LL_MC2018_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1prompt1_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt1_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1prompt1_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt1_MC2018_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1prompt2_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt2_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set1prompt2_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set1prompt2_MC2018_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2LL1_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set2LL1_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2LL1_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set2LL1_MC2018_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2prompt1_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set2prompt1_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2prompt1_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set2prompt1_MC2018_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2prompt2_MC2018HEM_fast.root"] = "id1_id2_RA2bin_pMSSM_set2prompt2_MC2018HEM_nominal"
+thnsparses_sr_2018[rootdir+"RA2bin_signal_pMSSM_set2prompt2_MC2018_fast.root"] = "id1_id2_RA2bin_pMSSM_set2prompt2_MC2018_nominal"
+
+rootdir_ntot = "/nfs/dust/cms/user/beinsam/pMSSM13TeV/Scan2/Combination/CMSSW_10_2_13/src/THnSparses/CMS_SUS_19_006/tree_common/"
+thnsparses_ntot_2017 = {}
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set1LL_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set1prompt1_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set1prompt2_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set1prompt3_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set2LL1_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set2LL2_MC2017.root"] = "nEventProc"
+thnsparses_ntot_2017[rootdir_ntot+"tree_pMSSM_set2prompt1_MC2017.root"] = "nEventProc"
+
+thnsparses_ntot_2018 = {}
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1LL_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1LL_MC2018HEM.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1prompt1_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1prompt1_MC2018HEM.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1prompt2_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set1prompt2_MC2018HEM.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2LL1_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2LL1_MC2018HEM.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2prompt1_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2prompt1_MC2018HEM.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2prompt2_MC2018.root"] = "nEventProc"
+thnsparses_ntot_2018[rootdir_ntot+"tree_pMSSM_set2prompt2_MC2018HEM.root"] = "nEventProc"
