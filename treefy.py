@@ -77,6 +77,7 @@ def run(args):
 
     infiles = importlib.import_module(".".join([args.analysis,"ThnSparse_inputs"]))
     #the following are dictionaries mapping the input file names for the respective year for the signal regions "sr" and the event totals "ntot" to the respective thnsparse therein
+    #If the event totals are in the same ThnSparses as the SR bin counts, the map for ntot and sr in the file THnSparse_inputs should be identical
     infiles_sr_2017 = infiles.thnsparses_sr_2017
     infiles_sr_2018 = infiles.thnsparses_sr_2018
     infiles_ntot_2017 = infiles.thnsparses_ntot_2017
@@ -94,6 +95,7 @@ def run(args):
             fout.write("referencecoords = "+str(referencecoords))
     else:
         from pMSSMIds import referencecoords
+    Year_to_infiles_dict = {"2017":{"sr":infiles_sr_2017,"ntot":infiles_ntot_2017},"2018":{"sr":infiles_sr_2018,"ntot":infiles_ntot_2018}} # for now, this dictionary is only used in the event totals loop below to check whether the event totals are a bin of the sr bin counts ThnSparse
     for year, hnsparsedict in {"2017":infiles_sr_2017,"2018":infiles_sr_2018}.items():
         print("running signal regions for year: ",year)
         ix = 1
@@ -104,7 +106,6 @@ def run(args):
             hnsparsefile = TFile(filepath)
             hnsparse = getattr(hnsparsefile,hnsparsename)
             thnsparsedim = hnsparse.GetNdimensions()
-            break
             for linix in tqdm(range(hnsparse.GetNbins())):#iterate over LINEAR THnSparse indices. All filled bins in a thnsparse are assigned a unique linear index
                 coordinates = np.intc([0]*thnsparsedim) # container with 3D coordinates, filled with THnSparse bin bin coordinates by calling thnsparse.GetBinContent()
                 #The ThnSparse coordinates are set up such that coordinates is filled with [chain_index,Niteration, SR bin] after GetBinContent is called 
@@ -138,7 +139,7 @@ def run(args):
                         collect_output[(int(coordinates[0]),int(coordinates[1]))][year][tuple(coordinates[2-thnsparsedim:])]["name_"+year] += count
                             
             hnsparsefile.Close()
-    #repeat the thing for the event totals. If the event totals are provided in a signal region bin above, the code above needs to be modified.
+    #repeat the thing for the event totals. If the event totals are provided in a signal region bin above, the event totals should already be in the output collection dictionary. In that case, the loop below is skipped
     #only do this if the event totals are in a separate THnSparse
     
     for year, hnsparsedict in {"2017":infiles_ntot_2017,"2018":infiles_ntot_2018}.items():
@@ -147,6 +148,9 @@ def run(args):
         for filepath,hnsparsename in hnsparsedict.items():
             print("processing file nr. ",ix, " of ",len(hnsparsedict))
             ix+=1
+            if filepath in Year_to_infiles_dict[year]["sr"].keys() and hnsparsename == Year_to_infiles_dict[year]["sr"][filepath]:
+                print("The event totals are located inside the ThnSparse for the signal region event counts and thus already inside the output collection dictionary, skipping the dedicated event totals loop to avoid double counting")
+                continue
             hnsparsefile = TFile(filepath)
             hnsparse = getattr(hnsparsefile,hnsparsename)
             thnsparsedim = hnsparse.GetNdimensions()
