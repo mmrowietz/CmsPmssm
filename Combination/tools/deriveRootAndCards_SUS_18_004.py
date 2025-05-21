@@ -45,9 +45,9 @@ nohup python tools/removeReplaceFolder.py combineroots/CMS_SUS_18_004/Run2 &
 nohup python tools/removeReplaceFolder.py combineroots/CMS_SUS_21_006/Run2 &
 '''
 
-istest = False
-useBatch = True #only applies to Run2s
-doSmallNumber = False
+istest = True #found it false after desert
+useBatch = False#found it true after desert #only applies to Run2s
+doSmallNumber = True# found it False after desert
 
 analysis = 'CMS_SUS_18_004'
 
