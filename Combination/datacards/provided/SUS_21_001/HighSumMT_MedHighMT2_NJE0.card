@@ -1,0 +1,39 @@
+# HighSumMT_MedHighMT2_NJE0 Datacard
+        imax 1  number of channels
+        jmax 4  number of backgrounds
+        kmax *  number of nuisance parameters (sources of systematical uncertainties)
+        ------------
+        bin HighSumMT_MedHighMT2_NJE0
+        observation 0.000
+        ------------
+        bin                       HighSumMT_MedHighMT2_NJE0               HighSumMT_MedHighMT2_NJE0              HighSumMT_MedHighMT2_NJE0               HighSumMT_MedHighMT2_NJE0          HighSumMT_MedHighMT2_NJE0 
+        process                 signal           fakepos         fakeneg             dy            higgs
+        process                   0                  1                2                 3            4
+        rate                   777          3.132          0.133           2.514       0.000
+        ------------
+        sigstatHighSumMT_MedHighMT2_NJE0 lnN        999         -         -               -               -               
+        fakeposstatHighSumMT_MedHighMT2_NJE0 gmN 13        -         0.241               -               -       -     
+        fakenegstatHighSumMT_MedHighMT2_NJE0 gmN 6        -         -               0.022               -          -      
+        dystatHighSumMT_MedHighMT2_NJE0 gmN 7    -               -           -           0.359           -     
+        topsyst lnN       -             -         -               1.020           -     
+        embnorm    lnN       -             -         -               1.190         -       
+        tauID         lnN       1.065         -              -            1.074      -       
+        tauIDDisp  lnN       1.030             -         -               -        -        
+        jes         lnN       1.068         -              -             -             -      
+        jer         lnN       1.061         -              -             -         -       
+        uncEn         lnN       1.086         -              -             -        -       
+        tes         lnN       1.138         -              -             1.001          -      
+        btag         lnN       1.000         -            -               -            -    
+        preFire_2016         lnN       1.000         -            -               -           -       
+        preFire_2017         lnN       1.000         -            -               -            -       
+        ISR_2016         lnN       1.000         -            -               -           -       
+        ISR_other         lnN       1.009         -            -               -             -        
+        scale         lnN       1.033         -            -               -            -      
+        pileUp         lnN       1.125         -            -               -           -     
+        lumi         lnN       1.016         -            -               -               1.016
+        tauTrig         lnN       1.077         -            -               1.037           -     
+        metTrig         lnN       1.015         -            -               1.010              -   
+        xSec         lnN       -         -            -               -              1.2   
+        fakesyst lnN        -         1.328               1.542               -              -    
+        betaposHighSumMT_MedHighMT2_NJE0     rateParam HighSumMT_MedHighMT2_NJE0 fakepos  1 [.99,1.01] 
+        betanegHighSumMT_MedHighMT2_NJE0     rateParam HighSumMT_MedHighMT2_NJE0 fakeneg  -1 [-1.01,-.99] 
